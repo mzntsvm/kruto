@@ -139,8 +139,6 @@
                 if (!response.ok) throw new Error('Ошибка при загрузке');
                 
                 const data = await response.json();
-                
-                // Какие валюты показать
                 const codes = ['USD', 'EUR', 'CNY', 'GBP', 'KZT'];
 
                 let tableHTML = `
