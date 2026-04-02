@@ -92,8 +92,8 @@
     <header>
         <nav>
             <button data-group=".page" data-target="page-1">Главная</button>
-            <button data-group=".page" data-target="page-2">Курсы валют</button>
-            <button data-group=".page" data-target="page-3">Примеры</button>
+            <button data-group=".page" data-target="page-2">Крипто Рынок</button>
+            <button data-group=".page" data-target="page-3">Сложение рандомных чисел</button>
         </nav>
     </header>
 
@@ -112,82 +112,177 @@
         </div>
 
         <div class="page" id="page-2">
-            <h2>Стоимость 1 единицы валюты в рублях</h2>
-            <div id="currency-content">
+            <h2>Глобальная статистика крипторынка</h2>
+            <div id="crypto-content">
                 <p>Нажмите кнопку выше, чтобы загрузить данные...</p>
             </div>
         </div>
 
         <div class="page" id="page-3">
-            <h2>Другие работы</h2>
-            <p>Здесь будет описание ваших будущих проектов.</p>
+           <!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Стилизованная Таблица</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            padding: 40px;
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .section-header::before {
+            content: "";
+            width: 4px;
+            height: 24px;
+            background-color: #5d5fef; 
+            margin-right: 12px;
+            border-radius: 2px;
+        }
+        table {
+            width: 100%;
+            max-width: 800px;
+            border-collapse: separate;
+            border-spacing: 0 10px; 
+        }
+        td {
+            background: #fff;
+            padding: 15px 20px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            text-align: center;
+        }
+        th {
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            font-weight: normal;
+        }
+        button {
+            margin-top: 20px;
+            background-color: #5d5fef;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="section-header">Калькулятор</div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Число А</th>
+                <th>Число Б</th>
+                <th>Сумма</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td id="num1">0</td>
+                <td id="num2">0</td>
+                <td id="sum" style="font-weight: bold; color: #5d5fef;">0</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <button onclick="generateRandom()">Сгенерировать случайные числа</button>
+
+    <script>
+        function generateRandom() {
+            const n1 = Math.floor(Math.random() * 100);
+            const n2 = Math.floor(Math.random() * 100);
+            
+            document.getElementById('num1').innerText = n1;
+            document.getElementById('num2').innerText = n2;
+            document.getElementById('sum').innerText = n1 + n2;
+        }
+        generateRandom();
+    </script>
+
+</body>
+</html>
+
         </div>
     </main>
 
     <script>
-        const currencyContent = document.getElementById('currency-content');
+        const cryptoContent = document.getElementById('crypto-content');
 
-        async function fetchCurrency() {
-            currencyContent.innerHTML = '<p class="loading">Загрузка актуальных курсов...</p>';
+        async function fetchCrypto() {
+            cryptoContent.innerHTML = '<p class="loading">Получение данных от CoinLore...</p>';
             
             try {
-                const url = 'https://exchangerate.host';
-                const fallbackUrl = 'https://er-api.com';
-
-                const response = await fetch(fallbackUrl);
+                const url = 'https://api.coinlore.net/api/global/';
+                const response = await fetch(url);
                 
-                if (!response.ok) throw new Error('Ошибка при загрузке');
+                if (!response.ok) throw new Error('Ошибка сети');
                 
-                const data = await response.json();
-                const codes = ['USD', 'EUR', 'CNY', 'GBP', 'KZT'];
+                const rawData = await response.json();
+                const data = rawData[0]; 
 
                 let tableHTML = `
                     <table class="schedule-table">
                         <thead>
                             <tr>
-                                <th>Код</th>
-                                <th>Валюта</th>
-                                <th>Цена в рублях</th>
+                                <th>Показатель</th>
+                                <th>Значение</th>
                             </tr>
                         </thead>
                         <tbody>
+                            <tr>
+                                <td><strong>Всего монет</strong></td>
+                                <td>${data.coins_count.toLocaleString()}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Доминация BTC</strong></td>
+                                <td>${data.btc_d}%</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Доминация ETH</strong></td>
+                                <td>${data.eth_d}%</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Изменение капитализации</strong></td>
+                                <td style="color: ${data.mcap_change >= 0 ? '#10b981' : '#ef4444'}">
+                                    ${data.mcap_change}%
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Активных маркетов</strong></td>
+                                <td>${data.active_markets.toLocaleString()}</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 `;
 
-                codes.forEach(code => {
-                    if (data.rates[code]) {
-                        const rubPerUnit = (1 / data.rates[code]).toFixed(2);
-                        tableHTML += `
-                            <tr>
-                                <td><strong>${code}</strong></td>
-                                <td>${getCurrencyName(code)}</td>
-                                <td>${rubPerUnit} ₽</td>
-                            </tr>
-                        `;
-                    }
-                });
-
-                tableHTML += '</tbody></table>';
-                tableHTML += `<p><small>Обновлено: ${new Date().toLocaleString('ru-RU')}</small></p>`;
-                currencyContent.innerHTML = tableHTML;
+                cryptoContent.innerHTML = tableHTML;
 
             } catch (error) {
                 console.error('Fetch error:', error);
-                currencyContent.innerHTML = `
-                    <p class="error">Ошибка загрузки данных.</p>
-                    <small>Попробуйте обновить страницу или проверить соединение.</small>
+                cryptoContent.innerHTML = `
+                    <p class="error">Не удалось загрузить статистику.</p>
+                    <small>Возможно, API временно недоступно.</small>
                 `;
             }
-        }
-
-        function getCurrencyName(code) {
-            const names = {
-                'USD': 'Доллар США',
-                'EUR': 'Евро',
-                'CNY': 'Юань',
-                'GBP': 'Фунт',
-                'KZT': 'Тенге'
-            };
-            return names[code] || code;
         }
 
         document.querySelectorAll('button[data-group]').forEach(button => {
@@ -200,7 +295,7 @@
                 });
 
                 if (targetId === 'page-2') {
-                    fetchCurrency();
+                    fetchCrypto();
                 }
             };
         });
