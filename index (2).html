@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mzntsvm - Portfolio</title>
+    <style>
+        :root {
+            --primary-color: #6366f1; 
+            --bg-color: #f8fafc;
+            --text-color: #1e293b;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            line-height: 1.6; 
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+        }
+
+        nav {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            border-radius: 8px;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        button:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .page.show {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 { font-size: 2.5rem; color: var(--primary-color); margin-bottom: 10px; }
+        h2 { border-left: 4px solid var(--primary-color); padding-left: 15px; margin-top: 30px; }
+        
+        ul { list-style: none; padding: 0; }
+        li { background: var(--card-bg); margin-bottom: 8px; padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); }
+        
+        p { background: var(--card-bg); padding: 15px; border-radius: 10px; border: 1px solid var(--border-color); }
+
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        .schedule-table th, .schedule-table td {
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            text-align: left;
+        }
+        .schedule-table th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .loading { color: var(--primary-color); font-weight: bold; }
+        .error { color: #ef4444; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <nav>
+            <button data-group=".page" data-target="page-1">Главная</button>
+            <button data-group=".page" data-target="page-2">Курсы валют</button>
+            <button data-group=".page" data-target="page-3">Примеры</button>
+        </nav>
+    </header>
+
+    <main>
+        <div class="page show" id="page-1">
+            <h1>mzntsvm</h1>
+            <h2>О себе</h2>
+            <p>Студент IThub, изучаю разработку и современные технологии.</p>
+            <h2>Навыки</h2>
+            <ul>
+                <li>HTML / CSS (база)</li>
+                <li>Python / JavaScript (в процессе)</li>
+            </ul>
+            <h2>Образование</h2>
+            <p><strong>Ithub-Ставрополь</strong>, 2024-2028</p>
+        </div>
+
+        <div class="page" id="page-2">
+            <h2>Стоимость 1 единицы валюты в рублях</h2>
+            <div id="currency-content">
+                <p>Нажмите кнопку выше, чтобы загрузить данные...</p>
+            </div>
+        </div>
+
+        <div class="page" id="page-3">
+            <h2>Другие работы</h2>
+            <p>Здесь будет описание ваших будущих проектов.</p>
+        </div>
+    </main>
+
+    <script>
+        const currencyContent = document.getElementById('currency-content');
+
+        async function fetchCurrency() {
+            currencyContent.innerHTML = '<p class="loading">Загрузка актуальных курсов...</p>';
+            
+            try {
+                // Используем стабильное API (Base RUB)
+                const url = 'https://exchangerate.host';
+                // Примечание: Это временный ключ для демонстрации. 
+                // Если он перестанет работать, можно использовать: 
+                const fallbackUrl = 'https://er-api.com';
+
+                const response = await fetch(fallbackUrl);
+                
+                if (!response.ok) throw new Error('Ошибка при загрузке');
+                
+                const data = await response.json();
+                
+                // Какие валюты показать
+                const codes = ['USD', 'EUR', 'CNY', 'GBP', 'KZT'];
+
+                let tableHTML = `
+                    <table class="schedule-table">
+                        <thead>
+                            <tr>
+                                <th>Код</th>
+                                <th>Валюта</th>
+                                <th>Цена в рублях</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                codes.forEach(code => {
+                    if (data.rates[code]) {
+                        // Рассчитываем обратный курс (сколько рублей за 1 единицу валюты)
+                        const rubPerUnit = (1 / data.rates[code]).toFixed(2);
+                        tableHTML += `
+                            <tr>
+                                <td><strong>${code}</strong></td>
+                                <td>${getCurrencyName(code)}</td>
+                                <td>${rubPerUnit} ₽</td>
+                            </tr>
+                        `;
+                    }
+                });
+
+                tableHTML += '</tbody></table>';
+                tableHTML += `<p><small>Обновлено: ${new Date().toLocaleString('ru-RU')}</small></p>`;
+                currencyContent.innerHTML = tableHTML;
+
+            } catch (error) {
+                console.error('Fetch error:', error);
+                currencyContent.innerHTML = `
+                    <p class="error">Ошибка загрузки данных.</p>
+                    <small>Попробуйте обновить страницу или проверить соединение.</small>
+                `;
+            }
+        }
+
+        function getCurrencyName(code) {
+            const names = {
+                'USD': 'Доллар США',
+                'EUR': 'Евро',
+                'CNY': 'Юань',
+                'GBP': 'Фунт',
+                'KZT': 'Тенге'
+            };
+            return names[code] || code;
+        }
+
+        document.querySelectorAll('button[data-group]').forEach(button => {
+            button.onclick = event => {
+                const groupSelector = button.dataset.group;
+                const targetId = event.currentTarget.dataset.target;
+                
+                document.querySelectorAll(groupSelector).forEach(element => {
+                    element.classList.toggle('show', element.id === targetId);
+                });
+
+                if (targetId === 'page-2') {
+                    fetchCurrency();
+                }
+            };
+        });
+    </script>
+</body>
+</html>
