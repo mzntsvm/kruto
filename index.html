@@ -131,10 +131,7 @@
             currencyContent.innerHTML = '<p class="loading">Загрузка актуальных курсов...</p>';
             
             try {
-                // Используем стабильное API (Base RUB)
                 const url = 'https://exchangerate.host';
-                // Примечание: Это временный ключ для демонстрации. 
-                // Если он перестанет работать, можно использовать: 
                 const fallbackUrl = 'https://er-api.com';
 
                 const response = await fetch(fallbackUrl);
@@ -160,7 +157,6 @@
 
                 codes.forEach(code => {
                     if (data.rates[code]) {
-                        // Рассчитываем обратный курс (сколько рублей за 1 единицу валюты)
                         const rubPerUnit = (1 / data.rates[code]).toFixed(2);
                         tableHTML += `
                             <tr>
